@@ -215,6 +215,12 @@
             updateProjectiles(); // Mettre à jour les projectiles
         }
 
+        // Fonction d'animation (demande un nouveau frame)
+        function animate() {
+            drawGame();
+            requestAnimationFrame(animate); // Appel récursif pour l'animation
+        }
+
         // Réinitialiser la partie
         document.getElementById('resetBtn').addEventListener('click', function() {
             player.x = 100;
@@ -224,8 +230,8 @@
             drawGame();
         });
 
-        // Initialiser le jeu
-        drawGame();
+        // Démarrer l'animation
+        animate(); // Démarre la boucle d'animation
     </script>
 </body>
 </html>
