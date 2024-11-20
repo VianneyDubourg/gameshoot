@@ -18,6 +18,7 @@ io.on('connection', (socket) => {
     // Assigner une couleur unique à chaque joueur
     const color = getRandomColor();
 
+    // Ajouter un nouveau joueur
     players.push({ id: socket.id, color: color, lives: 3, x: 100, y: 100 });
 
     socket.emit('start', { players, color });  // Envoie de la liste des joueurs et de la couleur
@@ -32,16 +33,10 @@ io.on('connection', (socket) => {
         io.emit('update', players);  // Envoie des nouvelles positions à tous
     });
 
-    socket.on('shoot', (data) => {
-        // Logique pour gérer le tir et la détection de collision
-        console.log(`${socket.id} tire à ${data.angle}`);
-        // Ici, tu peux ajouter la logique pour vérifier si le tir touche un autre joueur
-    });
-
     socket.on('disconnect', () => {
         console.log('Un joueur a quitté: ' + socket.id);
         players = players.filter(p => p.id !== socket.id);
-        io.emit('update', players);
+        io.emit('update', players); // Mise à jour des autres joueurs
     });
 });
 
