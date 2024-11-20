@@ -4,14 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jeu Multijoueur</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #gameCanvas {
+            background-color: lightgrey;
+            border: 2px solid black;
+            display: block;
+            margin: 20px auto;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>Jeu Multijoueur</h1>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-    </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="game.js"></script>
+    <canvas id="gameCanvas"></canvas>
+
+    <button id="resetBtn">Réinitialiser la Partie</button>
+
+    <script>
+        // Initialisation du canvas et des variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Attribuer une couleur aléatoire au joueur
+        const playerColor = '#' + Math.floor(Math.random() * 16777215).toString(16); // Couleur aléatoire
+
+        let player = {
+            x: 100,
+            y: 100,
+            color: playerColor,
+            lives: 3
+        };
+
+        // Fonction pour dessiner le joueur
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Réinitialiser la partie
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            player.x = 100;
+            player.y = 100;
+            player.lives = 3;
+            drawGame();
+        });
+
+        // Déplacer le joueur avec les touches du clavier
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowUp') player.y -= 5;
+            if (event.key === 'ArrowDown') player.y += 5;
+            if (event.key === 'ArrowLeft') player.x -= 5;
+            if (event.key === 'ArrowRight') player.x += 5;
+
+            drawGame();
+        });
+
+        // Fonction pour dessiner l'état du jeu
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Effacer l'écran
+            drawPlayer(); // Dessiner le joueur
+        }
+
+        // Initialiser le jeu
+        drawGame();
+    </script>
 </body>
 </html>
