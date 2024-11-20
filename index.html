@@ -128,12 +128,29 @@
             drawGame();
         });
 
+        // Fonction pour vérifier les collisions entre un projectile et les murs
+        function checkCollisions(projectile) {
+            for (let wall of walls) {
+                // Vérifier si le projectile touche un mur
+                if (projectile.x > wall.x && projectile.x < wall.x + wall.width && projectile.y > wall.y && projectile.y < wall.y + wall.height) {
+                    return true; // Collision détectée
+                }
+            }
+            return false; // Aucune collision
+        }
+
         // Fonction pour mettre à jour les projectiles
         function updateProjectiles() {
             for (let i = 0; i < projectiles.length; i++) {
                 let p = projectiles[i];
                 p.x += p.dx;
                 p.y += p.dy;
+
+                // Vérifier les collisions avec les murs
+                if (checkCollisions(p)) {
+                    projectiles.splice(i, 1); // Supprimer le projectile en cas de collision
+                    i--;
+                }
 
                 // Supprimer les projectiles qui sortent du canvas
                 if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
