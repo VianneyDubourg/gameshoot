@@ -51,8 +51,16 @@
             x: 100,
             y: 100,
             color: playerColor,
-            lives: 3
+            lives: 3,
+            angle: 0, // Angle de tir
         };
+
+        let projectiles = []; // Tableau pour stocker les projectiles
+        let walls = [
+            {x: 200, y: 100, width: 100, height: 20}, // Mur 1
+            {x: 400, y: 300, width: 20, height: 100}, // Mur 2
+            {x: 600, y: 500, width: 100, height: 20}  // Mur 3
+        ];
 
         // Fonction pour dessiner le joueur
         function drawPlayer() {
@@ -60,6 +68,88 @@
             ctx.beginPath();
             ctx.arc(player.x, player.y, 20, 0, Math.PI * 2);
             ctx.fill();
+
+            // Dessiner la barre de tir
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y);
+            ctx.lineTo(player.x + Math.cos(player.angle) * 40, player.y + Math.sin(player.angle) * 40);
+            ctx.stroke();
+        }
+
+        // Fonction pour dessiner les murs
+        function drawWalls() {
+            ctx.fillStyle = "gray";
+            for (let wall of walls) {
+                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+            }
+        }
+
+        // Fonction pour dessiner les projectiles
+        function drawProjectiles() {
+            ctx.fillStyle = "red";
+            for (let projectile of projectiles) {
+                ctx.beginPath();
+                ctx.arc(projectile.x, projectile.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Fonction pour déplacer le joueur
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowUp') player.y -= 5;
+            if (event.key === 'ArrowDown') player.y += 5;
+            if (event.key === 'ArrowLeft') player.x -= 5;
+            if (event.key === 'ArrowRight') player.x += 5;
+
+            // S'assurer que le joueur reste dans les limites du canvas
+            player.x = Math.max(20, Math.min(canvas.width - 20, player.x));
+            player.y = Math.max(20, Math.min(canvas.height - 20, player.y));
+
+            drawGame();
+        });
+
+        // Fonction pour tirer un projectile
+        document.addEventListener('keydown', function(event) {
+            if (event.key === ' ') { // Espace pour tirer
+                let projectile = {
+                    x: player.x + Math.cos(player.angle) * 20,
+                    y: player.y + Math.sin(player.angle) * 20,
+                    dx: Math.cos(player.angle) * 5,
+                    dy: Math.sin(player.angle) * 5
+                };
+                projectiles.push(projectile);
+            }
+
+            if (event.key === 'ArrowLeft') player.angle -= 0.1;
+            if (event.key === 'ArrowRight') player.angle += 0.1;
+
+            drawGame();
+        });
+
+        // Fonction pour mettre à jour les projectiles
+        function updateProjectiles() {
+            for (let i = 0; i < projectiles.length; i++) {
+                let p = projectiles[i];
+                p.x += p.dx;
+                p.y += p.dy;
+
+                // Supprimer les projectiles qui sortent du canvas
+                if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                    projectiles.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+
+        // Fonction pour dessiner l'état du jeu
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Effacer l'écran
+            drawWalls(); // Dessiner les murs
+            drawPlayer(); // Dessiner le joueur
+            drawProjectiles(); // Dessiner les projectiles
+            updateProjectiles(); // Mettre à jour les projectiles
         }
 
         // Réinitialiser la partie
@@ -67,24 +157,9 @@
             player.x = 100;
             player.y = 100;
             player.lives = 3;
+            projectiles = [];
             drawGame();
         });
-
-        // Déplacer le joueur avec les touches du clavier
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowUp') player.y -= 5;
-            if (event.key === 'ArrowDown') player.y += 5;
-            if (event.key === 'ArrowLeft') player.x -= 5;
-            if (event.key === 'ArrowRight') player.x += 5;
-
-            drawGame();
-        });
-
-        // Fonction pour dessiner l'état du jeu
-        function drawGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Effacer l'écran
-            drawPlayer(); // Dessiner le joueur
-        }
 
         // Initialiser le jeu
         drawGame();
