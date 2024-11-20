@@ -53,6 +53,7 @@
             color: playerColor,
             lives: 3,
             angle: 0, // Angle de tir
+            speed: 5,
         };
 
         let projectiles = []; // Tableau pour stocker les projectiles
@@ -96,16 +97,32 @@
             }
         }
 
-        // Fonction pour déplacer le joueur
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowUp') player.y -= 5;
-            if (event.key === 'ArrowDown') player.y += 5;
-            if (event.key === 'ArrowLeft') player.x -= 5;
-            if (event.key === 'ArrowRight') player.x += 5;
+        // Fonction pour vérifier les collisions entre un objet et les murs
+        function checkCollisions(x, y, width, height) {
+            for (let wall of walls) {
+                if (x < wall.x + wall.width && x + width > wall.x &&
+                    y < wall.y + wall.height && y + height > wall.y) {
+                    return true; // Collision détectée
+                }
+            }
+            return false; // Aucune collision
+        }
 
-            // S'assurer que le joueur reste dans les limites du canvas
-            player.x = Math.max(20, Math.min(canvas.width - 20, player.x));
-            player.y = Math.max(20, Math.min(canvas.height - 20, player.y));
+        // Fonction pour déplacer le joueur avec vérification de la collision
+        document.addEventListener('keydown', function(event) {
+            let newX = player.x;
+            let newY = player.y;
+
+            if (event.key === 'ArrowUp') newY -= player.speed;
+            if (event.key === 'ArrowDown') newY += player.speed;
+            if (event.key === 'ArrowLeft') newX -= player.speed;
+            if (event.key === 'ArrowRight') newX += player.speed;
+
+            // Vérifier la collision avant de déplacer le joueur
+            if (!checkCollisions(newX - 20, newY - 20, 40, 40)) {
+                player.x = newX;
+                player.y = newY;
+            }
 
             drawGame();
         });
@@ -129,7 +146,7 @@
         });
 
         // Fonction pour vérifier les collisions entre un projectile et les murs
-        function checkCollisions(projectile) {
+        function checkProjectileCollisions(projectile) {
             for (let wall of walls) {
                 // Vérifier si le projectile touche un mur
                 if (projectile.x > wall.x && projectile.x < wall.x + wall.width && projectile.y > wall.y && projectile.y < wall.y + wall.height) {
@@ -147,7 +164,7 @@
                 p.y += p.dy;
 
                 // Vérifier les collisions avec les murs
-                if (checkCollisions(p)) {
+                if (checkProjectileCollisions(p)) {
                     projectiles.splice(i, 1); // Supprimer le projectile en cas de collision
                     i--;
                 }
