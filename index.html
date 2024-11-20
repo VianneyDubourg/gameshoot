@@ -54,6 +54,7 @@
             lives: 3,
             angle: 0, // Angle de tir
             speed: 5,
+            direction: 'right', // Direction actuelle (haut, bas, gauche, droite)
         };
 
         let projectiles = []; // Tableau pour stocker les projectiles
@@ -70,12 +71,23 @@
             ctx.arc(player.x, player.y, 20, 0, Math.PI * 2);
             ctx.fill();
 
-            // Dessiner la barre de tir
+            // Dessiner la barre de tir en fonction de la direction du joueur
             ctx.strokeStyle = "black";
             ctx.lineWidth = 5;
             ctx.beginPath();
             ctx.moveTo(player.x, player.y);
-            ctx.lineTo(player.x + Math.cos(player.angle) * 40, player.y + Math.sin(player.angle) * 40);
+
+            // Position de la barre de tir selon la direction du joueur
+            if (player.direction === 'up') {
+                ctx.lineTo(player.x, player.y - 40); // Haut
+            } else if (player.direction === 'down') {
+                ctx.lineTo(player.x, player.y + 40); // Bas
+            } else if (player.direction === 'left') {
+                ctx.lineTo(player.x - 40, player.y); // Gauche
+            } else if (player.direction === 'right') {
+                ctx.lineTo(player.x + 40, player.y); // Droite
+            }
+
             ctx.stroke();
         }
 
@@ -113,10 +125,22 @@
             let newX = player.x;
             let newY = player.y;
 
-            if (event.key === 'ArrowUp') newY -= player.speed;
-            if (event.key === 'ArrowDown') newY += player.speed;
-            if (event.key === 'ArrowLeft') newX -= player.speed;
-            if (event.key === 'ArrowRight') newX += player.speed;
+            if (event.key === 'ArrowUp' && player.direction !== 'down') {
+                player.direction = 'up'; // Changer la direction
+                newY -= player.speed;
+            }
+            if (event.key === 'ArrowDown' && player.direction !== 'up') {
+                player.direction = 'down'; // Changer la direction
+                newY += player.speed;
+            }
+            if (event.key === 'ArrowLeft' && player.direction !== 'right') {
+                player.direction = 'left'; // Changer la direction
+                newX -= player.speed;
+            }
+            if (event.key === 'ArrowRight' && player.direction !== 'left') {
+                player.direction = 'right'; // Changer la direction
+                newX += player.speed;
+            }
 
             // Vérifier la collision avant de déplacer le joueur
             if (!checkCollisions(newX - 20, newY - 20, 40, 40)) {
@@ -131,19 +155,24 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === ' ') { // Espace pour tirer
                 let projectile = {
-                    x: player.x + Math.cos(player.angle) * 20,
-                    y: player.y + Math.sin(player.angle) * 20,
-                    dx: Math.cos(player.angle) * 5,
-                    dy: Math.sin(player.angle) * 5
+                    x: player.x + Math.cos(getAngleFromDirection(player.direction)) * 20,
+                    y: player.y + Math.sin(getAngleFromDirection(player.direction)) * 20,
+                    dx: Math.cos(getAngleFromDirection(player.direction)) * 5,
+                    dy: Math.sin(getAngleFromDirection(player.direction)) * 5
                 };
                 projectiles.push(projectile);
             }
 
-            if (event.key === 'ArrowLeft') player.angle -= 0.1;
-            if (event.key === 'ArrowRight') player.angle += 0.1;
-
             drawGame();
         });
+
+        // Convertir la direction du joueur en angle
+        function getAngleFromDirection(direction) {
+            if (direction === 'up') return -Math.PI / 2;
+            if (direction === 'down') return Math.PI / 2;
+            if (direction === 'left') return Math.PI;
+            if (direction === 'right') return 0;
+        }
 
         // Fonction pour vérifier les collisions entre un projectile et les murs
         function checkProjectileCollisions(projectile) {
